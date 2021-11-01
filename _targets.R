@@ -23,7 +23,8 @@ list(
     values = tibble(state_abb = states),
 
     # pull site data
-    tar_target(nwis_data, get_site_data(sites_info = oldest_active_sites, state_abb, parameter))
+    tar_target(nwis_inventory, get_state_inventory(sites_info = oldest_active_sites, state_abb)),
+    tar_target(nwis_data, get_site_data(sites_info = nwis_inventory, state_abb, parameter))
 
     # tally data
 

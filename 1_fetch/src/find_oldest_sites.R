@@ -1,3 +1,11 @@
+#' Identify oldest USGS gage
+#'
+#' Identifies the oldest USGS gage within a user-specified state and
+#' for a user-specified parameter
+#'
+#' @param state chr, two letter state abbreviation (e.g., "WI")
+#' @param parameter chr, six-digit USGS parameter code
+#'
 find_oldest_site <- function(state, parameter) {
   message(sprintf('  Inventorying sites in %s', state))
   sites <- dataRetrieval::whatNWISdata(
@@ -21,6 +29,27 @@ find_oldest_site <- function(state, parameter) {
     slice(1) # OK has two sites tied for first; just take one
   return(best_site)
 }
+
+#' Identify oldest USGS gage
+#'
+#' Identifies the oldest USGS gage for a vector of user-specified states and
+#' for a user-specified parameter
+#'
+#' @param states chr, vector of two letter state abbreviations (e.g., `c("WI", "MI")`)
+#' @param parameter chr, six-digit USGS parameter code
+#'
 find_oldest_sites <- function(states, parameter) {
   purrr::map_df(states, find_oldest_site, parameter)
 }
+
+#' Generate state inventory
+#'
+#' Takes a table of gage metadata for and returns data for user-selected state
+#'
+#' @param sites_info table for NWIS state data
+#' @param state chr, two letter state abbreviation
+#'
+get_state_inventory <- function(sites_info, state) {
+  site_info <- dplyr::filter(sites_info, state_cd == state)
+}
+
