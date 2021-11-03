@@ -7,7 +7,8 @@ plot_site_data <- function(out_file, site_data, parameter) {
     geom_line() +
     geom_point(data=filter(site_data, !(Quality %in% c('A','P'))), size=0.1) +
     ylab(dataRetrieval::parameterCdFile %>% filter(parameter_cd == parameter) %>% pull(parameter_nm)) +
-    ggtitle(site_data$Site[1])
+    ggtitle(with(site_data, paste(State[1], " (Gage # ", Site[1], ")", sep = ""))) +
+    theme(plot.title = element_text(hjust = 0.5))
   ggsave(out_file, plot=p, width=6, height=3)
   return(out_file)
 }
