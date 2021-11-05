@@ -6,4 +6,5 @@
 # Specific files/dirs to ignore for this pipeline
 */tmp/*
 */out/*
+*/log/*
 /_targets/*
