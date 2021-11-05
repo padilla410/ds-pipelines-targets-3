@@ -18,30 +18,37 @@ source("3_visualize/src/plot_site_data.R")
 states <- c('WI','MN','MI', 'IL', 'IN', 'IA')
 parameter <- c('00060')
 
+# Static branching set-up
+mapped_by_state_targets <- tar_map(
+  values = tibble(state_abb = states) %>%
+    mutate(state_plot_files = sprintf("3_visualize/out/timesseries_%s.png", state_abb)),
+
+  # pull site data - inventory by state and then data
+  tar_target(nwis_inventory,
+             get_state_inventory(sites_info = oldest_active_sites, state_abb)),
+  tar_target(nwis_data,
+             get_site_data(site_info = nwis_inventory, state_abb, parameter)),
+
+  # tally data
+  tar_target(tally, tally_site_obs(site_data = nwis_data)),
+
+  # plot data
+  tar_target(timeseries_png,
+             plot_site_data(out_file = state_plot_files,
+                            site_data = nwis_data, parameter = parameter)),
+  names = state_abb,
+  unlist = FALSE
+)
+
 # Targets
 list(
   # Identify oldest sites
   tar_target(oldest_active_sites, find_oldest_sites(states, parameter)),
 
-  tar_map(
-    values = tibble(state_abb = states) %>%
-      mutate(state_plot_files = sprintf("3_visualize/out/timesseries_%s.png", state_abb)),
-
-    # pull site data
-    tar_target(nwis_inventory,
-               get_state_inventory(sites_info = oldest_active_sites, state_abb)),
-    tar_target(nwis_data,
-               get_site_data(site_info = nwis_inventory, state_abb, parameter)),
-
-    # tally data
-    tar_target(tally, tally_site_obs(site_data = nwis_data)),
-
-    # plot data
-    tar_target(timeseries_png,
-               plot_site_data(out_file = state_plot_files,
-                              site_data = nwis_data, parameter = parameter)),
-    names = state_abb
-  ),
+  # Combine static branches - calling the mapped targets and combining with custom fctn
+  mapped_by_state_targets,
+  tar_combine(obs_tallies, mapped_by_state_targets$tally,
+              command = combine_obs_tallies(!!!.x)),
 
   # Map oldest sites
   tar_target(
