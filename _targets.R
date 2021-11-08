@@ -1,12 +1,10 @@
 suppressPackageStartupMessages(library(dplyr))
-library(leaflet)
-library(leafpop)
-library(htmlwidgets)
+library(retry)
 library(targets)
 library(tarchetypes)
 library(tibble)
-
 library(tidyr)
+
 
 options(tidyverse.quiet = TRUE)
 tar_option_set(packages = c("cowplot", "dataRetrieval", "htmlwidgets",
@@ -24,7 +22,11 @@ source("3_visualize/src/plot_data_coverage.R")
 source("3_visualize/src/plot_site_data.R")
 
 # Configuration
-states <- c('WI', 'MN', 'MI', 'IL', 'IN', 'IA')
+states <- c('AL','AZ','AR','CA','CO','CT','DE','DC','FL','GA','ID','IL','IN','IA',
+            'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH',
+            'NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX',
+            'UT','VT','VA','WA','WV','WI','WY','AK','HI','GU','PR')
+
 parameter <- c('00060')
 
 # Static branching set-up
@@ -35,8 +37,14 @@ mapped_by_state_targets <- tar_map(
   # pull site data - inventory by state and then data
   tar_target(nwis_inventory,
              get_state_inventory(sites_info = oldest_active_sites, state_abb)),
+
   tar_target(nwis_data,
-             get_site_data(site_info = nwis_inventory, state_abb, parameter)),
+             retry::retry(
+               get_site_data(site_info = nwis_inventory, state_abb, parameter),
+               when = "Ugh, the internet data transfer failed!",
+               max_tries = 30
+             )
+  ),
 
   # tally data
   tar_target(tally, tally_site_obs(site_data = nwis_data)),
