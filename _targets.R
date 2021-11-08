@@ -80,8 +80,9 @@ list(
   tar_target(
     data_coverage_png,
     plot_data_coverage(oldest_site_tallies = tally,
-                                out_file = "3_visualize/out/site_map.png",
-                                parameter = parameter)
+                                out_file = "3_visualize/out/data_coverage.png",
+                                parameter = parameter),
+    format = "file"
     ),
 
   # Map oldest sites
