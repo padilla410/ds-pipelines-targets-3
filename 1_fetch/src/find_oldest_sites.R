@@ -42,14 +42,15 @@ find_oldest_sites <- function(states, parameter) {
   purrr::map_df(states, find_oldest_site, parameter)
 }
 
-#' Generate state inventory
-#'
-#' Takes a table of gage metadata for and returns data for user-selected state
-#'
-#' @param sites_info table for NWIS state data
-#' @param state chr, two letter state abbreviation
-#'
-get_state_inventory <- function(sites_info, state) {
-  site_info <- dplyr::filter(sites_info, state_cd == state)
-}
+#' #' Generate state inventory
+#' #'
+#' #' Takes a table of gage metadata for and returns data for user-selected state.
+#' #' Used for static branching.
+#' #'
+#' #' @param sites_info table for NWIS state data
+#' #' @param state chr, two letter state abbreviation
+#' #'
+#' get_state_inventory <- function(sites_info, state) {
+#'   site_info <- dplyr::filter(sites_info, state_cd == state)
+#' }
 
